@@ -1,0 +1,12 @@
+
+@import '@angular/material/prebuilt-themes/deeppurple-amber.css';
+.btn-orange {
+  background: #ff8a00;
+  color: #fff;
+}
+
+.btn-orange:hover, .btn-orange:active, .btn-orange:focus {
+  background: #ff8a00;
+  color: #fff;
+  outline: none;
+}

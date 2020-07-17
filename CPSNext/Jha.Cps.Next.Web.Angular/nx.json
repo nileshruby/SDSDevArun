@@ -1,0 +1,21 @@
+{
+  "npmScope": "cps-next-ui",
+  "affected": {
+    "defaultBase": "master"
+  },
+  "implicitDependencies": {
+    "angular.json": "*",
+    "package.json": "*",
+    "tsconfig.json": "*",
+    "tslint.json": "*",
+    "nx.json": "*"
+  },
+  "projects": {
+    "cps-next-ui": {
+      "tags": []
+    },
+    "cps-next-ui-e2e-e2e": {
+      "tags": []
+    }
+  }
+}

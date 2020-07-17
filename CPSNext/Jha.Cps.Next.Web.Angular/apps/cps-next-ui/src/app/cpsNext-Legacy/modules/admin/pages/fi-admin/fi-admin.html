@@ -1,0 +1,526 @@
+<div class="fi-admin col-md-12 col-lg-12 col-sm-12" contentHeight=".page-wrapper">
+  <div class="grid-header">
+    <div class="controls" *ngIf="!loading">
+      <table>
+        <tr>
+          <td>
+            <form [formGroup]="ResetFilterboxForm">
+              <filter-box (onClear)="RefreshFilterboxGrid($event,datatable)" (onChange)="onSearch($event,datatable)" placeholder="Search FI Name..."></filter-box>
+            </form>
+          </td>
+          <td>
+            <button (click)="onFiCreateClick()" class="btn btn-default btn-default-custom btn-default-custom-info default-boot">
+              <i class="fa fa-plus"></i>
+              New FI
+            </button>
+          </td>
+          <td></td>
+          <td>
+            <button (click)="datatable.exportCSV()" class="btn btn-default btn-default-custom btn-default-custom-green marg-left-5 default-boot">
+              <i class="fa fa-file-excel-o"></i>
+              Export
+            </button>
+          </td>
+          <td>
+            <button (click)="collaspeAll()" class="btn btn-default btn-default-custom btn-default-custom-dark-blue marg-left-5 default-boot"><i class="fa fa-minus"></i> Collapse  All</button>
+          </td>
+        </tr>
+      </table>
+    </div>
+    <h3 class="title header">
+      Global Admin - Financial Institution Maintenance
+      <span *ngIf="items && (items.length === resultCount)">(FI Count {{items.length}} results)</span>
+      <span *ngIf="items && (items.length !== resultCount)">(FI Count {{resultCount}} of {{items.length}} results)</span>
+    </h3>
+  </div>
+
+  <div #fiGrid>
+    <p-table [value]="fiList" [columns]="cols" #datatable dataKey="fiId" [responsive]="true" [resizableColumns]="true" scrollHeight="70vh" [scrollable]="true" exportFilename="fiadmin"  [expandedRowKeys]="expandedRows" [paginator]="true" [rows]="17">
+      <ng-template pTemplate="colgroup" let-tableColumns> 
+        <colgroup> 
+          <col *ngFor="let col of tableColumns" > 
+        </colgroup> 
+      </ng-template>   
+      <ng-template pTemplate="header" let-columns>
+            <tr>
+                <th pResizableColumn *ngFor="let col of columns" [pSortableColumn]="col.field">
+                    {{col.header}}
+                    <p-sortIcon [field]="col.field"></p-sortIcon>
+                    <i class="pi pi-bars br-align"></i>
+                </th>
+                <th pResizableColumn class="edit-btn">
+                </th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-fiList let-expanded="expanded">
+            <tr>
+                <td class="ui-resizable-column">
+                    <a [pRowToggler]="fiList" class="icon-right">
+                        <i [ngClass]="expanded ? 'pi pi-minus' : 'pi pi-plus'"></i>
+                    </a>
+                    {{fiList.fiId}}
+                </td>
+                <td class="ui-resizable-column">{{fiList.aba}}</td>
+                <td class="ui-resizable-column">{{fiList.fiName}}</td>
+                <td class="ui-resizable-column">{{fiList.fiNameShort}}</td>
+                <td class="ui-resizable-column">{{fiList.mainframeId}}</td>
+                <td class="txt-center ui-resizable-column">
+                    <i class="fa fa-check" *ngIf="fiList.isFdcMigrated"></i>
+                  </td>
+                <td class="ui-resizable-column">{{fiList.pscuClientId}}</td>
+                <td class="ui-resizable-column">{{fiList.address}}</td>
+                <td class="ui-resizable-column">{{fiList.city}}</td>
+                <td class="ui-resizable-column">{{fiList.state}}</td>
+                <td class="ui-resizable-column">{{fiList.zip}}</td>
+                <td class="ui-resizable-column">{{fiList.zip4}}</td>
+                <td class="edit-btn ui-resizable-column">
+                    <i class="pi pi-pencil" (click)="onFiEditClick({data: fiList})"></i>
+                    <i class="pi pi-trash" (click)="onFiDeleteClick({data: fiList})"></i>
+                </td>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="rowexpansion" let-fiList>
+          <!-- {{fiList}} -->
+          <tr>
+            <td colspan="13" class="no-padding tab-collapse">
+                <div class="ui-g tablebox ">
+                    <div class="ui-g-12 ui-md-1 no-padding txt-center" >
+                        <button class="btn btn-default btn-default-custom btn-default-custom-info default-boot" (click)="onBinCreateClick({data: fiList})">
+                            <i class="fa fa-plus"></i>
+                            New Bin
+                          </button>
+                    </div>
+                    <div class="ui-g-12 ui-md-11 no-padding">
+                        <p-table [value]="fiList.bins" [paginator]="true" [rows]="6">
+                          <ng-template pTemplate="colgroup" let-tableColumns> 
+                            <colgroup> 
+                              <col *ngFor="let col of tableColumns" > 
+                            </colgroup> 
+                          </ng-template> 
+                            <ng-template pTemplate="header">
+                                <tr>
+                                    <th>BIN <i class="pi pi-bars br-align"></i></th>
+                                    <th>Card Type <i class="pi pi-bars br-align"></i></th>
+                                    <th>ICA <i class="pi pi-bars br-align"></i></th>
+                                    <th>PAN Pattern <i class="pi pi-bars br-align"></i></th>
+                                    <th>Shared Sys <i class="pi pi-bars br-align"></i></th>
+                                    <th>System Number <i class="pi pi-bars br-align"></i></th>
+                                    <th>Principal Number <i class="pi pi-bars br-align"></i></th>
+                                    <th>Agent <i class="pi pi-bars br-align"></i></th>
+                                    <th>Merchant Number <i class="pi pi-bars br-align"></i></th>
+                                    <th class="edit-btn">
+                                    </th>
+                                </tr>
+                            </ng-template>
+                            <ng-template pTemplate="body" let-bins>
+                                <tr>
+                                    <td>
+                                        <a (click)="onExpandView({data: bins})" class="icon-right">
+                                            <i class="pi pi-plus"></i>
+                                        </a>
+                                        {{bins.binNumber}}
+                                    </td>
+                                    <td>{{bins.cardType}}</td>
+                                    <td>{{bins.icaNumber}}</td>
+                                    <td>{{bins.panPattern}}</td>
+                                    <td class="txt-center ui-resizable-column">
+                                      <i class="fa fa-check" *ngIf="bins.sharedSys"></i>
+                                    </td>
+                                    <td>{{bins.systemNumber}}</td>
+                                    <td>{{bins.principleNumber}}</td>
+                                    <td>{{bins.agentNumber}}</td>
+                                    <td>{{bins.merchantNumber}}</td>
+                                    <td class=" edit-btn">
+                                        <i class="pi pi-pencil" (click)="onBinEditClick({data: bins})"></i>
+                                        <i class="pi pi-trash" (click)="onBinDeleteClick({data: bins})"></i>
+                                    </td>
+                                </tr>
+                            </ng-template>
+                        </p-table>
+                    </div>
+                </div>
+            </td>
+          </tr>
+            
+        </ng-template>
+    </p-table> 
+  </div>
+
+  <!-- FI MODAL -->
+  <local-modal #fiModal
+               [target]="fiGrid"
+               height="80%"
+               width="60%">
+    <header *ngIf="fiEditing"  class="header">
+      <h4 *ngIf="!fiEditing.fiId">Add Financial Institution</h4>
+      <h4 *ngIf="fiEditing.fiId">Edit Financial Institution</h4>
+    </header>
+    <main>
+      <form [formGroup]="fiForm"
+            *ngIf="fiForm"
+            (ngSubmit)="onFiSaveClick()">
+        <table class="table table-responsive">
+          <!-- <tr>
+              <mat-slide-toggle
+              [(ngModel)]="goLiveState"
+              [ngModelOptions]="{standalone: true}"
+              (change)="onToggle()"
+              class="example-margin"
+              [color]="primary"
+              [checked]="checked"
+              [disabled]="disabled">{{liveStatus}}</mat-slide-toggle>
+          </tr> -->
+          <tr>
+            <td>ABA Number: <span style="color:Red;">*</span></td>
+            <td>
+              <input type="text"
+                     class="form-control"
+                     placeholder="ABA Number"
+                     maxlength="9"
+                     formControlName="aba"
+                     inputValidate
+                           errorMessage="ABA Number is required"
+                     (keyup)="restrictToNumeric($event)" />
+            </td>
+          </tr>
+          <tr>
+            <td>Name: <span style="color:Red;">*</span></td>
+            <td>
+              <input type="text"
+                     class="form-control"
+                     placeholder="Name"
+                     inputValidate
+                           errorMessage="Name is required"
+                     formControlName="fiName" />
+            </td>
+          </tr>
+          <tr>
+            <td>Short Name:</td>
+            <td>
+              <input type="text"
+                     class="form-control"
+                     placeholder="Short Name"
+                     formControlName="fiNameShort"/>
+            </td>
+          </tr>
+          <tr>
+            <td>Mainframe FIID: <span style="color:Red;">*</span></td>
+            <td>
+              <input type="text"
+                     class="form-control"
+                     placeholder="Mainframe ID"
+                     formControlName="mainframeId"
+                     inputValidate
+                           errorMessage="Mainframe FIID is required"
+                     id="mainframeId"
+                     (keypress)="IV.alphaNumericOnly($event)" />
+            </td>
+          </tr>
+          <tr>
+            <td>Migrated to FDC?:</td>
+            <td>
+              <input type="checkbox"
+                     class="large-checkbox form-control"
+                     formControlName="isFdcMigrated" />
+            </td>
+          </tr>
+          <tr>
+            <td>PSCU Client ID: </td>
+            <td>
+              <input type="text"
+                     class="form-control"
+                     placeholder="PSCU Client ID"
+                     formControlName="pscuClientId"
+                     (keyup)="IV.alphaNumericOnly($event)" />
+            </td>
+          </tr>
+          <tr>
+            <td>Address: <span style="color:Red;">*</span></td>
+            <td>
+              <input type="text"
+                     class="form-control"
+                     placeholder="Address"
+                     formControlName="address" 
+                     (keypress)="IV.alphaNumericOnly($event,true)" 
+                     inputValidate
+                           errorMessage="Address is required"
+                     maxlength="24"/>
+            </td>
+          </tr>
+          <tr>
+            <td>City: <span style="color:Red;">*</span></td>
+            <td>
+              <input type="text"
+                     class="form-control"
+                     placeholder="City"
+                     formControlName="city"
+                     (keypress)="IV.alphaNumericOnly($event,true)" 
+                     inputValidate
+                           errorMessage="City is required"
+                     maxlength="18" />
+                     
+            </td>
+          </tr>
+          <tr>
+            <td>State: <span style="color:Red;">*</span></td>
+            <td>
+              <input type="text"
+                     class="form-control"
+                     placeholder="State"
+                     inputValidate
+                           errorMessage="State is required"
+                     formControlName="state" maxlength="2" (keyup)="restrictToAplhatwoChars($event)" 
+                     minlength="2"/>
+            </td>
+          </tr>
+          <tr>
+            <td>Zip: <span style="color:Red;">*</span></td>
+            <td>
+              <input type="text"
+                     class="form-control" minlength="5" maxlength="5" (keyup)="restrictToNumeric($event)"
+                     placeholder="Zip"
+                     inputValidate
+                           errorMessage="Zip is required"
+                     formControlName="zip" />
+            </td>
+          </tr>
+          <tr>
+            <td>Extended Zip:</td>
+            <td>
+              <input type="text"
+                     class="form-control"
+                     placeholder="Extended Zip" maxlength="4" (keyup)="restrictToNumeric($event)"
+                     formControlName="zip4" />
+            </td>
+          </tr>
+        </table>
+      </form>
+    </main>
+
+    <footer class="form-controls-row pr-35">
+      <button (click)="onFiSaveClick()" *ngIf="!saving" class="btn btn-sm btn-orange btn-default-custom btn-default-custom-info">Save</button>
+      <button (click)="onFiCancelClick()" *ngIf="!saving" class="btn btn-sm btn-default btn-default-custom btn-default-custom-red default-boot " >Cancel</button>
+      <button *ngIf="saving">
+        <loading-anim></loading-anim>
+      </button>
+    </footer>
+  </local-modal>
+  
+  <!-- BIN MODAL -->
+  <local-modal #binModal
+               [target]="fiGrid"
+               height="550"
+               width="75%">
+    <header class="header">
+      <h4>{{action}} BIN</h4>
+    </header>
+    <main *ngIf="binForm">
+      <form [formGroup]="binForm" class="binContainer">
+        <div class="row display-flex">
+          <div class="btn-container-wd"></div>
+          <div class="col-md-5 col-xs-12">
+            <table class="table table-responsive formtable" border="0">
+              <tbody>
+                <tr>
+                  <td class="v-m">BIN: <span style="color:Red;">*</span></td>
+                  <td class="v-m-2">
+                    <input type="text" class="form-control" placeholder="BIN" formControlName="BinNumber" maxlength="9" minlength="6" (keypress)="IV.numericOnly($event)" inputValidate errorMessage="Bin is required" [attr.disabled]="binEditing ? '' : null" />
+                    <div *ngIf="binForm.get('BinNumber').hasError('minlength')">
+                      <span style="color: rgb(180, 12, 12);">Bin should be minimum of 6 numbers</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="v-m">ICA:</td>
+                  <td class="v-m-2">
+                    <select formControlName="ICA" class="form-control" *ngIf="!loadingMasterCardICAID" (change)="MCICAChange($event)" [(ngModel)]="selectedMasterCardICAID">
+                      <option value="0">Select</option>
+                      <option *ngFor="let MCICA of mastercardICAList" [value]="MCICA.ICAID">
+                        {{MCICA.ICA}}
+                      </option>
+                    </select>   
+                    <loading-anim *ngIf="loadingMasterCardICAID"></loading-anim>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="v-m">Shared Sys:</td>
+                  <td class="v-m-2">
+                    <input type="checkbox" class="form-control" class="large-checkbox" formControlName="SharedSys" (change)="sharedSysChangeEvent($event)"/>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="v-m">PAN Pattern:</td>
+                  <td class="v-m-2">
+                    <input type="text" class="form-control" maxlength="16" placeholder="PAN Pattern" (keypress)="alphaNumericOnly($event)"  formControlName="PanPattern" />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="col-md-5 col-xs-12 master-bin">
+            <div>
+              <span>For Mastercard BIN only</span>
+            </div>
+          </div>
+        </div>
+        <div class="row display-flex">
+            <div class="col-md-12 col-xs-12 btn-container-wd"></div>
+              <!-- <div class="col-md-10 col-xs-12 ht-error-div">
+                  <p class="error-message" *ngIf="isFormSubmit && binForm.get('Nums').dirty && binForm.get('Nums').invalid" >System Number, Principal Number and Agent Number should be 4 digit and Merchant Number can max be 16 digits.Accepts only numeric</p>
+              </div> -->
+        </div>
+        <div class="row display-flex">
+            <div class="col-md-1 col-xs-12 btn-container-wd">
+              <button (click)="addDetailRow()" class="btn btn-default btn-default-custom btn-default-custom-dark-blue" > New Row </button>
+            </div>
+            <div class="col-md-12 col-xs-12">
+             
+              <div  class="detail-table">  
+                <table border="1" *ngIf="isbinDetails" class="table table-responsive  table-striped width-100" formArrayName="Nums">
+                 <thead>
+                    <tr>
+                      <th> System Number </th>
+                      <th> Principal Number </th>
+                      <th> Agent </th>
+                      <th> Merchant Number </th>
+                      <th> Actions </th>
+                    </tr>
+                 </thead>
+                  <tbody>
+                      <tr *ngFor="let BSList of binForm.get('Nums').controls; let i= index;" [formGroupName]="i">
+                        <td> 
+                          <input class="form-control" (keypress)="IV.numericOnly($event)" [ngClass]="{'red-border-class': isFieldInvalid(i, 'PscuSysNum')}"  type="text" formControlName="PscuSysNum" [attr.disabled]="!BSList.value.EditMod ? '' : null"/>
+                          <div class="col-md-10 col-xs-12 ht-error-div">
+                            <p class="error-message" *ngIf="isFormSubmit && binForm.get('Nums').dirty && isFieldInvalid(i, 'PscuSysNum')" >Must be 4 digits</p>
+                        </div>
+                          
+                        </td>
+                        <td> 
+                          <input class="form-control" (keypress)="IV.numericOnly($event)" [ngClass]="{'red-border-class': isFieldInvalid(i, 'PscuPrinNum')}"  type="text" formControlName="PscuPrinNum" [attr.disabled]="!BSList.value.EditMod ? '' : null">
+                          <div class="col-md-10 col-xs-12 ht-error-div">
+                            <p class="error-message" *ngIf="isFormSubmit && binForm.get('Nums').dirty && isFieldInvalid(i, 'PscuPrinNum')" >Must be 4 digits</p>
+                        </div>
+                        </td>
+                        <td> 
+                          <input class="form-control" (keypress)="IV.numericOnly($event)" [ngClass]="{'red-border-class': isFieldInvalid(i, 'AgentNum')}"  type="text" formControlName="AgentNum" [attr.disabled]="!BSList.value.EditMod ? '' : null">
+                          <div class="col-md-10 col-xs-12 ht-error-div">
+                            <p class="error-message" *ngIf="isFormSubmit && binForm.get('Nums').dirty && isFieldInvalid(i, 'AgentNum')" >Must be 4 digits</p>
+                        </div>
+                        </td>
+                        <td>
+                          <input class="form-control" (keypress)="IV.numericOnly($event)" [ngClass]="{'red-border-class': isFieldInvalid(i, 'MerchantNum')}"  type="text" formControlName="MerchantNum" [attr.disabled]="!BSList.value.EditMod ? '' : null">
+                          <div class="col-md-10 col-xs-12 ht-error-div">
+                            <p class="error-message" *ngIf="isFormSubmit && binForm.get('Nums').dirty && isFieldInvalid(i, 'MerchantNum')" >Max 16 digits</p>
+                        </div>
+                        </td>
+                        <td class="text-center" align="center">
+                          <button (click)="EditBinSetupDetailRow(i)" *ngIf="!BSList.value.EditMod" class='button-image btn-edit'></button>
+                          <button (click)="DeleteBinSetupDetailRow(i)" class='button-image btn-delete'></button>
+                        </td>
+                      </tr>
+                  </tbody>
+                </table>
+                <span *ngIf="!isbinDetails">No data available for bin details</span>
+              </div>
+            </div>
+        </div>
+      </form>
+    </main>
+
+    <footer class="form-controls-row pr-80">
+      <button (click)="onBinSaveClick()" *ngIf="!saving" class="btn btn-sm btn-orange btn-default-custom btn-default-custom-info">Save</button>
+      <button (click)="onBinCancelClick()" *ngIf="!saving" class="btn btn-sm btn-default btn-default-custom btn-default-custom-red" >Cancel</button>
+      <button *ngIf="saving">
+        <loading-anim></loading-anim>
+      </button>
+    </footer>
+  </local-modal>
+  <!-- Duplicate Dialog -->
+
+  <local-modal #rowDetailModal [target]="fiGrid" height="500" width="60%">
+    <header class="header">
+      <h4>BIN Details</h4>
+    </header>
+
+    <main *ngIf="viewData">
+        <div class="binContainer">
+          <div class="row display-flex">
+            <div class="col-md-3 col-xs-12">
+              <table class="table table-responsive formtable" border="0">
+                <tbody>
+                  <tr>
+                    <td class="v-m">BIN:</td>
+                    <td class="v-m-2">
+                      <p>{{viewData.binNumber}}</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="v-m">ICA:</td>
+                    <td class="v-m-2">
+                      <p>{{viewData.icaNumber}}</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="v-m">Shared Sys:</td>
+                    <td  class="v-m-2" *ngIf="expandflag == true">
+                      <input type="checkbox" disabled="true"  [attr.checked]="viewData.sharedSys ? '' : null" [value]="viewData.sharedSys" class="large-checkbox" name="SharedSys" />
+                    </td>
+                    <td class="v-m-2" *ngIf="!expandflag">
+                      <input type="checkbox" class="form-control disabled-input"  [attr.checked]="viewData.sharedSys ? '' : null"  [value]="viewData.sharedSys" class="large-checkbox" name="SharedSys" />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="v-m">PAN Pattern:</td>
+                    <td class="v-m-2">
+                      <p>{{viewData.panPattern}}</p>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="col-md-5 col-xs-12 master-bin">
+              <div>
+                <span>For Mastercard BIN only</span>
+              </div>
+            </div>
+          </div>
+          <div class="row display-flex">
+              <div class="col-md-12 col-xs-12">
+                <div  class="detail-table">  
+                  <table border="1" class="table table-responsive  table-striped width-100">
+                    <thead>
+                      <tr>
+                        <th> System Number </th>
+                        <th> Principal Number </th>
+                        <th> Agent </th>
+                        <th> Merchant Number </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let BSList of BinSetupDetailList; let i= index;">
+                          <td> 
+                            <p>{{BSList.PscuSysNum}}</p>
+                          </td>
+                          <td> 
+                            <p>{{BSList.PscuPrinNum}}</p>
+                          </td>
+                          <td> 
+                            <p>{{BSList.AgentNum}}</p>
+                          </td>
+                          <td>
+                            <p>{{BSList.MerchantNum}}</p>
+                          </td>
+                        </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+          </div>
+        </div>
+    </main>
+    <footer class="form-controls-row pr-80">
+      <button class="btn btn-sm btn-default btn-default-custom btn-default-custom-red default-boot"  (click)="onBinAdditionalDetailCloseClick()">Close</button>
+    </footer>
+  </local-modal>
+
+</div>

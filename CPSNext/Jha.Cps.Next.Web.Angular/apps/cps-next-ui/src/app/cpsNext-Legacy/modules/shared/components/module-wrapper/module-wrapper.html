@@ -1,0 +1,9 @@
+<app-header></app-header>
+
+<div #pageWrapper class="container-fluid page-wrapper">
+  <module-nav (onCollapse)="onNavBarCollapse($event)"></module-nav>
+
+  <div #mainWrapper class="main-wrapper pull-right" [ngClass]="mainWrapperClasses">
+    <router-outlet></router-outlet>
+  </div>
+</div>

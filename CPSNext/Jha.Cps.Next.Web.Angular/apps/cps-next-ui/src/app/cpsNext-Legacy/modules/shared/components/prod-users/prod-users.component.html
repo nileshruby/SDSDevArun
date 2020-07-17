@@ -1,0 +1,350 @@
+<div class="user-maint col-md-12 col-lg-12 col-sm-12" contentHeight=".main-wrapper">
+    <div class="grid-header">
+      <div class="controls" *ngIf="!loading">         
+        <table>
+          <tr>
+            <td>
+              <form [formGroup]="SearchForm">
+                <filter-box
+                (onClear)="RefreshFilterboxGrid(datatable)"
+                (onChange)="onSearch($event,datatable)"
+                placeholder="Search"
+              ></filter-box>
+              </form>
+            </td>
+            
+            <td>
+              <button (click)="onUsercreateClick()" class="btn btn-default btn-default-custom btn-default-custom-info default-boot">
+                <i class="fa fa-plus"></i>
+                Add New User
+              </button>
+            </td> 
+            <td></td>
+            <td>
+              <button *ngIf="users.length" class="btn btn-default btn-default-custom btn-default-custom-green marg-left-5 default-boot" (click)="datatable.exportCSV()">
+                <i class="fa fa-file-excel-o"></i>
+                Export
+              </button>
+            </td>
+          </tr>
+        </table>
+      </div>
+      <h4 class="title">{{Heading}} - Product User Administration </h4>
+     
+    </div>
+    <div #userGrid>
+        <p-table [value]="usersList" [columns]="cols" #datatable dataKey="UsrID" [responsive]="true" [resizableColumns]="true" scrollHeight="70vh" [scrollable]="true" exportFilename="Versions"  [paginator]="true" [rows]="17">
+          <ng-template pTemplate="colgroup" let-tableColumns> 
+            <colgroup> 
+              <col *ngFor="let col of tableColumns" > 
+            </colgroup> 
+          </ng-template> 
+            <ng-template pTemplate="header" let-columns>
+                <tr>
+                    <th pResizableColumn *ngFor="let col of columns"  [pSortableColumn]="col.field">
+                        {{col.header}}
+                        <p-sortIcon [field]="col.field"></p-sortIcon>
+                        <i class="pi pi-bars br-align"></i>
+                    </th>
+                    <th pResizableColumn class="edit-btn">
+                    </th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-usersList >
+                <tr>
+                    <td class="ui-resizable-column">{{usersList.FIID}}</td>
+                    <td class="ui-resizable-column">{{usersList.FIName}}</td>
+                    <td class="ui-resizable-column">{{usersList.Username}}</td>
+                    <td class="ui-resizable-column">{{usersList.FirstName}}</td>
+                    <td class="ui-resizable-column">{{usersList.LastName}}</td>
+                    <td class="ui-resizable-column">{{usersList.MainframeFIID}}</td>
+                    <td class="ui-resizable-column">{{usersList.Email}}</td>
+                    <td class="ui-resizable-column">{{usersList.Phone}}</td>
+                    <td class="ui-resizable-column">{{usersList.Role}}</td>
+                    <td class="ui-resizable-column">{{usersList.IsLocked}}</td>
+                    <td class="ui-resizable-column">{{usersList.PasswordStatus}}</td>
+                    <td class="ui-resizable-column">{{usersList.IsMFALocked}}</td>
+                    <td class="edit-btn ui-resizable-column">
+                        <i class="pi pi-pencil" (click)="onUserEditClick({data: usersList})"></i>
+                        <i class="pi pi-trash" (click)="onUserDeleteClick({data: usersList})"></i>
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table> 
+    </div>
+
+    <!-- <div contentHeight=".main-wrapper"
+         (resize)="onGridWrapperResize($event)">
+      <div class="dash-wrapper" *ngIf="showLoading">
+        <loading-anim></loading-anim>
+      </div>
+      <ag-grid #grid
+               [config]="gridOptions">
+      </ag-grid>
+    </div> -->
+    <!-- User MODAL -->
+    <local-modal #adminUserModal
+                 [target]="userGrid"
+                 height="85%"
+                 width="60%">
+      <header *ngIf="UserEditing"  class="header">
+        <h3 *ngIf="!UserEditing.Username">Add User</h3>
+        <h3 *ngIf="UserEditing.Username">Edit User</h3>
+      </header>
+      <main *ngIf="adminUserForm">
+        <form [formGroup]="adminUserForm"
+              (ngSubmit)="onUserSaveClick()">
+          <table class="table table-responsive "  border="0">
+  
+            <tr>
+              <td>FI Name</td>
+              <td>
+                <!-- <select formControlName="FIName" class="form-control" *ngIf="!loadingFIDs" (change)="FIChange($event)" [(ngModel)]="selectedFIID" [attr.disabled]="isDisabled ? '' : null">
+                  <option value="0">Select</option>
+                  <option *ngFor="let FI of fiList"
+                          [value]="FI.FIID">
+                    {{FI.Name}}
+                  </option>
+                </select> -->
+                <ng-multiselect-dropdown
+                  *ngIf="!loadingFIDs"
+                  [placeholder]="'Select'"
+                  [data]="dropdownList"
+                  [(ngModel)] = "FiSelect"
+                  [ngModelOptions]="{standalone: true}"
+                  [attr.disabled]="isDisabled ? '' : null"
+                  (onSelect)="FIChange($event)"
+                  (onDeSelect)="FIDeChange($event)"
+                  (onDeSelectAll)="FIDeChange($event)"
+                  [settings]="FidropdownSettings">
+                </ng-multiselect-dropdown>
+                <loading-anim *ngIf="loadingFIDs"></loading-anim>
+              </td>
+            </tr>
+            <tr>
+              <td>FIID</td>
+              <td>
+                <input type="text"
+                     class="form-control" [attr.disabled]="true"
+                     placeholder="FIID"
+                     formControlName="FIID" />
+              </td>
+            </tr>
+            <tr>
+              <td>User Name <span style="color:Red;">*</span></td>
+              <td>
+                <div class="row">
+                  <div [ngClass]="UserEditing.Username ? 'col-lg-12' : 'col-sm-8 col-lg-10'">
+                    <input type="text"
+                           class="form-control"
+                           placeholder="Name" required="true"
+                           [attr.disabled]="isEditDisabled ? '' : null"
+                           formControlName="Username" (keyup)="IsCheckUserName($event)" 
+                           inputValidate
+                           errorMessage="User Name is required"
+                           />
+                    <span class="help-block" [ngStyle]="(duplicateuser)?{'color':'red'}:{'color':'green'}">{{usernameAvailability}}</span>
+                  </div>
+                  <div class="col-sm-4 col-lg-2" *ngIf="!UserEditing.Username">
+                    <button type="button" (click)="IsUserExists(true)" class="btn btn-sm btn-default-custom-orange btn-default-custom width-100 hieght-34">Check</button>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>Last Name <span style="color:Red;">*</span></td>
+              <td>
+                <input type="text"
+                       class="form-control"
+                       [attr.disabled]="isDisabled ? '' : null"
+                       placeholder="LastName"
+                       formControlName="LastName" (keypress)="IV.alphaNumeric_AndDistinctCharactersOnly($event,',. -')"
+                       inputValidate
+                       errorMessage="Last Name is required"/>
+              </td>
+            </tr>
+            <tr>
+              <td>First Name <span style="color:Red;">*</span></td>
+              <td>
+                <input type="text"
+                       class="form-control"
+                       placeholder="FirstName" [attr.disabled]="isDisabled ? '' : null"
+                       formControlName="FirstName" (keypress)="IV.alphaNumeric_AndDistinctCharactersOnly($event,',. -')"
+                       inputValidate
+                       errorMessage="First Name is required"
+                       />
+              </td>
+            </tr>
+            <!-- <tr>
+              <td>Mainframe FIID</td>
+              <td>
+                <input type="text"
+                       class="form-control"
+                       placeholder="Mainframe FIID"
+                       formControlName="MainframeFIID" (keyup)="restrictToAplhaNumeric($event)"/>
+              </td>
+            </tr> -->
+            <tr>
+              <td>Email Address <span style="color:Red;">*</span></td>
+              <td>
+                  <input type="text"
+                    class="form-control"
+                    placeholder="Email" [attr.disabled]="isDisabled ? '' : null"
+                    formControlName="Email" (keyup)="restrictToValidemail($event)" (blur)="isUserEmailExists(true)"
+                    inputValidate
+                    errorMessage="Email Address is required" />
+                    <div *ngIf="invalidEmail">
+                      <span style="color: rgb(180, 12, 12);">Invalid Email</span> 
+                    </div> 
+                    <div *ngIf="duplicateemail">
+                      <span style="color: rgb(180, 12, 12);">{{emailAvailability}}</span> 
+                    </div>
+                    <div *ngIf="!duplicateemail">
+                      <span style="color: green;">{{emailAvailability}}</span> 
+                    </div>
+              </td>
+            </tr>
+            <tr>
+              <td>Phone</td>
+              <td>
+                <div class="row">
+                  <div class="col-lg-6 col-sm-6">
+                    <input type="text"
+                           class="form-control"
+                           placeholder="Phone" [attr.disabled]="isDisabled ? '' : null"
+                           formControlName="Phone" (keypress)="IV.numericOnly($event)" USPhoneFormat maxlength="14" minlength="0"  (keyup)="restrictToNumeric($event)" />
+                      <div *ngIf="invalidPhoneLength">
+                        <span style="color: rgb(180, 12, 12);">Phone Number should contain at least 10 digits</span> 
+                      </div>       
+                  </div>
+                  <div class="col-lg-1 col-sm-1">
+                    <span> Ext: </span>
+                  </div>
+                  <div class="col-lg-5 col-sm-5">
+                    <input type="text"
+                           class="form-control"
+                           placeholder="Extension" [attr.disabled]="isDisabled ? '' : null"
+                           formControlName="Extension"   (keypress)="IV.numericOnly($event)" maxlength="6" minlength="3" (keyup)="restrictToNumeric($event)"/>
+                    <div *ngIf="invalidPhoneAltLength">
+                      <span style="color: rgb(180, 12, 12);">Phone Number extension should contain at least 3 digits</span> 
+                    </div>
+                 </div>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>After Hours Phone</td>
+              <td>
+                <input type="text"
+                   class="form-control"
+                   placeholder="After Hours Phone" [attr.disabled]="isDisabled ? '' : null"
+                   formControlName="Phone2" (keyup)="restrictToNumeric($event)" USPhoneFormat maxlength="14" minlength="0"  (keypress)="IV.numericOnly($event)" />
+            <div *ngIf="invalidSecondaryPhoneLength">
+              <span style="color: rgb(180, 12, 12);">Phone Number should contain at least 10 digits</span> 
+            </div>  
+              </td>
+            </tr>
+            <tr>
+              <td>Product Assigned <span style="color:Red;">*</span></td>
+              <td>
+                <input type="text"
+                  class="form-control"
+                   [attr.disabled]="true"
+                   [value]="(ProductAssignedselected && ProductAssignedselected.length)?ProductAssignedselected[0].Name:''"  />
+                <!-- <ng-multiselect-dropdown
+                  [disabled]="true"
+                  [placeholder]="'Select'"
+                  [data]="dropdownList"
+                  [(ngModel)]="ProductAssignedselected"
+                  [ngModelOptions]="{standalone: true}"
+                  [settings]="dropdownSettings"
+                  (onSelect)="ProductAssginedSelectedOne($event)"
+                  (onSelectAll)="ProductAssginedSelectedAll($event)"
+                  (onDeSelect)="ProductAssginedSelectedDeOne($event)"
+                  (onDeSelectAll)="ProductAssginedSelectedDeAll($event)"
+                    public lockuserStatus = false;
+    public lockSecondaryuserStatus = false;
+  
+                >
+                </ng-multiselect-dropdown> -->
+              </td>
+            </tr>
+            <tr>
+              <td>Role  <span style="color:Red;">*</span></td>
+              <td>
+               
+                <select formControlName="Role" placeholder="Role" class="form-control"
+                inputValidate
+                errorMessage="Role is required"
+                >
+                  <option value="">Select</option>
+                  <option value="Admin">
+                      Product Admin
+                  </option>
+                  <option value="Regular">
+                      Product Standard User
+                  </option>
+                </select>
+              </td>
+            </tr>
+            <tr *ngIf="UserEditing.Username">
+              <td>Password Status</td>
+              <td>
+                <input type="text" disabled
+                       class="form-control"
+                       placeholder="Password Status"
+                       formControlName="PasswordStatus" />
+              </td>
+            </tr>
+            <tr *ngIf="intialvalue === 0">
+                <td>Unlock/Lock User account</td>
+                <td>
+                   <mat-slide-toggle [(ngModel)]="userlockState"
+                                    [ngModelOptions]="{standalone: true}"
+                                    (change)="onUserLockToggle($event)"
+                                    class="example-margin lock-unlock-user"
+                                    [color]="Primary"
+                                    [disabled]="disabled">
+                  </mat-slide-toggle>
+                </td>
+              </tr>
+              <tr *ngIf="intialvalue === 0">
+                <td>Unlock/Lock Secondary Authentication</td>
+                <td>
+                  <mat-slide-toggle [(ngModel)]="SecondaryAuthUser"
+                                    [ngModelOptions]="{standalone: true}"
+                                    (change)="onsecondaryAuthToggle($event)"
+                                    class="example-margin lock-unlock-user"
+                                    [color]="Primary"
+                                    [checked]="checked"
+                                    [disabled]="disabled">
+                  </mat-slide-toggle>
+                </td>
+              </tr>
+              <tr *ngIf="intialvalue === 0">
+                <td>Reset Password</td>
+                <td>
+                  <a title="Reset Password link" style="background-color:#FFFFFF;color:#5882dd; text-decoration-line:underline;" (click)="ResetUserPasswordGlobalAdmin()">Click to Reset Password</a>
+                </td>
+              </tr>
+              <tr *ngIf="intialvalue === 0">
+                <td>Reset Security Question/Answer</td>
+                <td>
+                  <a title="Reset Security Question/Answer link" style="background-color:#FFFFFF;color:#5882dd; text-decoration-line:underline;" (click)="resetUserSecurityQuestiondGlobalAdmin()">Click to Reset Security Question/Answer</a>
+        
+                </td>
+              </tr>
+          </table>
+        </form>
+      </main>
+  
+      <footer class="form-controls-row">
+        <button (click)="onUserSaveClick()" *ngIf="!saving" class="btn btn-sm btn-default-custom btn-default-custom-info">Save</button>
+        <button (click)="onUserCancelClick()" *ngIf="!saving" class="btn btn-sm btn-default btn-default-custom btn-default-custom-red default-boot" >Cancel</button>
+        <button *ngIf="saving">
+          <loading-anim></loading-anim>
+        </button>
+      </footer>
+    </local-modal>
+   
+  </div>

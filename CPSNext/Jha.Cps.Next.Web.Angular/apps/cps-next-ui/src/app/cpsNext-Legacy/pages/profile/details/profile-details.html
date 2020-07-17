@@ -1,0 +1,102 @@
+<section>
+  <header>
+    <label>Profile Details</label>
+
+    <div class="controls" *ngIf="!saving && !isEditMode">
+      <button class="btn-default-custom btn-default-custom-dark-blue"
+              (click)="onEditClick()">
+        <i class="fa fa-pencil"></i>
+        Edit
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <form [formGroup]="detailsForm" *ngIf="!saving">
+      <div class="row">
+        <div class="col-sm-12 col-md-4 col-lg-4">
+          <label>Username:</label>
+        </div>
+        <div class="col-sm-12 col-md-8 col-lg-8">
+          <label *ngIf="userDetails">{{userDetails.username}}</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-12 col-md-4 col-lg-4">
+          <label>First Name:</label>
+        </div>
+        <div class="col-sm-12 col-md-8 col-lg-8">
+          <label *ngIf="userDetails">{{userDetails.firstName}}</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-12 col-md-4 col-lg-4">
+          <label>Last Name:</label>
+        </div>
+        <div class="col-sm-12 col-md-8 col-lg-8">
+          <label *ngIf="userDetails">{{userDetails.lastName}}</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-12 col-md-4 col-lg-4">
+          <label>E-mail Address:</label>
+        </div>
+        <div class="col-sm-12 col-md-8 col-lg-8">
+          <label *ngIf="userDetails">{{userDetails.email}}</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-12 col-md-4 col-lg-4">
+          <label>Phone Number:</label>
+        </div>
+        <div class="col-sm-12 col-md-8 col-lg-8">
+          <div class="phont-with-ext" *ngIf="!isEditMode && userDetails">
+            <label >{{userDetails.phone | usphone}}</label>
+            <label *ngIf="userDetails.extension"> Ext {{userDetails.extension}}</label>
+          </div>
+          <div class="phont-with-ext" *ngIf="isEditMode && userDetails">
+            <input formControlName="phone" USPhoneFormat maxlength="14" (keypress)="IV.numericOnly($event)" (keyup)="validatePhoneNumberEntry($event)" />
+            <span style="font-weight: bold;">  Ext  </span>
+            <input formControlName="extension" maxlength="6" minlength="3" (keypress)="IV.numericOnly($event)" (keyup)="validatePhoneNumberEntry($event)" />
+            <div *ngIf="invalidPhoneLength">
+              <span style="color: rgb(180, 12, 12);">Phone Number should contain at least 10 digits</span>
+            </div>
+            <div *ngIf="detailsForm.get('phone').hasError('maxlength')">
+              <span style="color: rgb(180, 12, 12);">Phone Number should maximum contain a 10-digit number</span>
+            </div>
+            <div *ngIf="detailsForm.get('extension').hasError('minlength')">
+              <span style="color: rgb(180, 12, 12);">Extension should contain at least 3 digits</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-12 col-md-4 col-lg-4">
+          <label>After Hours Phone Number:</label>
+        </div>
+        <div class="col-sm-12 col-md-8 col-lg-8">
+          <label *ngIf="!isEditMode && userDetails">{{userDetails.phoneAlt | usphone}}</label>
+          <input *ngIf="isEditMode && userDetails" formControlName="phoneAlt" autocomplete="off" USPhoneFormat maxlength="14" minlength="0" (keypress)="IV.numericOnly($event)" (keyup)="validatePhoneNumberEntry($event)" />
+          <div *ngIf="invalidPhoneAltLength">
+            <span style="color: rgb(180, 12, 12);">Phone Number should contain at least 10 digits</span>
+          </div>
+          <div *ngIf="detailsForm.get('phoneAlt').hasError('maxlength')">
+            <span style="color: rgb(180, 12, 12);">Phone Number should maximum contain a 10-digit number</span>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-12 col-lg-12 col-sm-12 controls" *ngIf="isEditMode">
+        <button class="btn-default-custom btn-default-custom-info mr-1"
+                (click)="onSaveClick($event)">
+          Save
+        </button>
+        <button class="btn-default-custom btn-default-custom-red"
+                (click)="onCancelClick($event)">
+          Cancel
+        </button>
+      </div>
+    </form>
+
+    <loading-anim *ngIf="saving"></loading-anim>
+  </main>
+</section>

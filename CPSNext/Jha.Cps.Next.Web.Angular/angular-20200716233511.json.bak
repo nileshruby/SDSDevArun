@@ -1,0 +1,300 @@
+{
+  "version": 1,
+  "projects": {
+    "cpsnext-ui": {
+      "projectType": "application",
+      "schematics": {
+        "@nrwl/angular:component": {
+          "style": "scss"
+        }
+      },
+      "root": "apps/cpsnext-ui",
+      "sourceRoot": "apps/cpsnext-ui/src",
+      "prefix": "jha.cps.next.web.angular",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:browser",
+          "options": {
+            "outputPath": "dist/apps/cpsnext-ui",
+            "index": "apps/cpsnext-ui/src/index.html",
+            "main": "apps/cpsnext-ui/src/main.ts",
+            "polyfills": "apps/cpsnext-ui/src/polyfills.ts",
+            "tsConfig": "apps/cpsnext-ui/tsconfig.app.json",
+            "aot": true,
+            "assets": [
+              "apps/cpsnext-ui/src/favicon.ico",
+              "apps/cpsnext-ui/src/assets"
+            ],
+            "styles": ["apps/cpsnext-ui/src/styles.scss"],
+            "scripts": []
+          },
+          "configurations": {
+            "production": {
+              "fileReplacements": [
+                {
+                  "replace": "apps/cpsnext-ui/src/environments/environment.ts",
+                  "with": "apps/cpsnext-ui/src/environments/environment.prod.ts"
+                }
+              ],
+              "optimization": true,
+              "outputHashing": "all",
+              "sourceMap": false,
+              "extractCss": true,
+              "namedChunks": false,
+              "extractLicenses": true,
+              "vendorChunk": false,
+              "buildOptimizer": true,
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "2mb",
+                  "maximumError": "5mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "6kb",
+                  "maximumError": "10kb"
+                }
+              ]
+            }
+          }
+        },
+        "serve": {
+          "builder": "@angular-devkit/build-angular:dev-server",
+          "options": {
+            "browserTarget": "cpsnext-ui:build"
+          },
+          "configurations": {
+            "production": {
+              "browserTarget": "cpsnext-ui:build:production"
+            }
+          }
+        },
+        "extract-i18n": {
+          "builder": "@angular-devkit/build-angular:extract-i18n",
+          "options": {
+            "browserTarget": "cpsnext-ui:build"
+          }
+        },
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "apps/cpsnext-ui/tsconfig.app.json",
+              "apps/cpsnext-ui/tsconfig.spec.json"
+            ],
+            "exclude": ["**/node_modules/**", "!apps/cpsnext-ui/**/*"]
+          }
+        },
+        "test": {
+          "builder": "@nrwl/jest:jest",
+          "options": {
+            "jestConfig": "apps/cpsnext-ui/jest.config.js",
+            "tsConfig": "apps/cpsnext-ui/tsconfig.spec.json",
+            "passWithNoTests": true,
+            "setupFile": "apps/cpsnext-ui/src/test-setup.ts"
+          }
+        }
+      }
+    },
+    "cpsnext-ui-e2e": {
+      "root": "apps/cpsnext-ui-e2e",
+      "sourceRoot": "apps/cpsnext-ui-e2e/src",
+      "projectType": "application",
+      "architect": {
+        "e2e": {
+          "builder": "@nrwl/cypress:cypress",
+          "options": {
+            "cypressConfig": "apps/cpsnext-ui-e2e/cypress.json",
+            "tsConfig": "apps/cpsnext-ui-e2e/tsconfig.e2e.json",
+            "devServerTarget": "cpsnext-ui:serve"
+          },
+          "configurations": {
+            "production": {
+              "devServerTarget": "cpsnext-ui:serve:production"
+            }
+          }
+        },
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": ["apps/cpsnext-ui-e2e/tsconfig.e2e.json"],
+            "exclude": ["**/node_modules/**", "!apps/cpsnext-ui-e2e/**/*"]
+          }
+        }
+      }
+    },
+    "common-ui-controls": {
+      "projectType": "library",
+      "root": "libs/common/ui-controls",
+      "sourceRoot": "libs/common/ui-controls/src",
+      "prefix": "jha.cps.next.web.angular",
+      "architect": {
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "libs/common/ui-controls/tsconfig.lib.json",
+              "libs/common/ui-controls/tsconfig.spec.json"
+            ],
+            "exclude": ["**/node_modules/**", "!libs/common/ui-controls/**/*"]
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "libs/common/ui-controls/src/test.ts",
+            "tsConfig": "libs/common/ui-controls/tsconfig.spec.json",
+            "karmaConfig": "libs/common/ui-controls/karma.conf.js"
+          }
+        }
+      },
+      "schematics": {
+        "@nrwl/angular:component": {
+          "style": "scss"
+        }
+      }
+    },
+    "common-pipes": {
+      "projectType": "library",
+      "root": "libs/common/pipes",
+      "sourceRoot": "libs/common/pipes/src",
+      "prefix": "jha.cps.next.web.angular",
+      "architect": {
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "libs/common/pipes/tsconfig.lib.json",
+              "libs/common/pipes/tsconfig.spec.json"
+            ],
+            "exclude": ["**/node_modules/**", "!libs/common/pipes/**/*"]
+          }
+        },
+        "test": {
+          "builder": "@nrwl/jest:jest",
+          "options": {
+            "jestConfig": "libs/common/pipes/jest.config.js",
+            "tsConfig": "libs/common/pipes/tsconfig.spec.json",
+            "passWithNoTests": true,
+            "setupFile": "libs/common/pipes/src/test-setup.ts"
+          }
+        }
+      },
+      "schematics": {
+        "@nrwl/angular:component": {
+          "style": "scss"
+        }
+      }
+    },
+    "common-interceptors": {
+      "projectType": "library",
+      "root": "libs/common/interceptors",
+      "sourceRoot": "libs/common/interceptors/src",
+      "prefix": "jha.cps.next.web.angular",
+      "architect": {
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "libs/common/interceptors/tsconfig.lib.json",
+              "libs/common/interceptors/tsconfig.spec.json"
+            ],
+            "exclude": ["**/node_modules/**", "!libs/common/interceptors/**/*"]
+          }
+        },
+        "test": {
+          "builder": "@nrwl/jest:jest",
+          "options": {
+            "jestConfig": "libs/common/interceptors/jest.config.js",
+            "tsConfig": "libs/common/interceptors/tsconfig.spec.json",
+            "passWithNoTests": true,
+            "setupFile": "libs/common/interceptors/src/test-setup.ts"
+          }
+        }
+      },
+      "schematics": {
+        "@nrwl/angular:component": {
+          "style": "scss"
+        }
+      }
+    },
+    "common-guards": {
+      "projectType": "library",
+      "root": "libs/common/guards",
+      "sourceRoot": "libs/common/guards/src",
+      "prefix": "jha.cps.next.web.angular",
+      "architect": {
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "libs/common/guards/tsconfig.lib.json",
+              "libs/common/guards/tsconfig.spec.json"
+            ],
+            "exclude": ["**/node_modules/**", "!libs/common/guards/**/*"]
+          }
+        },
+        "test": {
+          "builder": "@nrwl/jest:jest",
+          "options": {
+            "jestConfig": "libs/common/guards/jest.config.js",
+            "tsConfig": "libs/common/guards/tsconfig.spec.json",
+            "passWithNoTests": true,
+            "setupFile": "libs/common/guards/src/test-setup.ts"
+          }
+        }
+      },
+      "schematics": {
+        "@nrwl/angular:component": {
+          "style": "scss"
+        }
+      }
+    },
+    "services": {
+      "projectType": "library",
+      "root": "libs/services",
+      "sourceRoot": "libs/services/src",
+      "prefix": "jha.cps.next.web.angular",
+      "architect": {
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "libs/services/tsconfig.lib.json",
+              "libs/services/tsconfig.spec.json"
+            ],
+            "exclude": ["**/node_modules/**", "!libs/services/**/*"]
+          }
+        },
+        "test": {
+          "builder": "@nrwl/jest:jest",
+          "options": {
+            "jestConfig": "libs/services/jest.config.js",
+            "tsConfig": "libs/services/tsconfig.spec.json",
+            "passWithNoTests": true,
+            "setupFile": "libs/services/src/test-setup.ts"
+          }
+        }
+      },
+      "schematics": {
+        "@nrwl/angular:component": {
+          "style": "scss"
+        }
+      }
+    }
+  },
+  "cli": {
+    "defaultCollection": "@nrwl/angular"
+  },
+  "schematics": {
+    "@nrwl/angular:application": {
+      "unitTestRunner": "jest",
+      "e2eTestRunner": "cypress"
+    },
+    "@nrwl/angular:library": {
+      "unitTestRunner": "jest"
+    }
+  },
+  "defaultProject": "cpsnext-ui"
+}

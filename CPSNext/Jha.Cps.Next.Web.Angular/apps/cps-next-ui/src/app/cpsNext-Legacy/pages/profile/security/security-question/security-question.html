@@ -1,0 +1,48 @@
+<div *ngIf="isVisible">
+  <div class="row" *ngIf="!isEditMode">
+    <button class="btn-default-custom btn-default-custom-dark-blue w-25" 
+            (click)="onEditClick($event)">
+      <i class="fa fa-pencil"></i>
+      Edit Security Question
+    </button>
+  </div>
+
+  <form [formGroup]="securityForm" *ngIf="!saving && isEditMode && securityForm">
+    <div class="row">
+      <div class="col-sm-12 col-md-4 col-lg-4">
+        <label>Security Question: <span style="color:Red;">*</span></label>
+      </div>
+      <div class="col-sm-12 col-md-8 col-lg-8">
+        <label *ngIf="!isEditMode">{{selectedQuestion || 'Not Set'}}</label>
+        <select formControlName="questionId" *ngIf="isEditMode">
+          <option *ngFor="let question of securityQuestions"
+                  [value]="question.QuestionId"
+                  (change)="onSelectionChange($event)">
+            {{question.Question}}
+          </option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row" *ngIf="isEditMode">
+      <div class="col-sm-12 col-md-4 col-lg-4">
+        <label>Answer: <span style="color:Red;">*</span></label>
+      </div>
+      <div class="col-sm-12 col-md-8 col-lg-8">
+        <input formControlName="answer" />
+      </div>
+    </div>
+
+    <div class="col-md-12 col-lg-12 col-sm-12 controls" *ngIf="isEditMode">
+      <button class="btn-default-custom btn-default-custom-info mr-1"
+              (click)="onSaveClick($event)">
+        Save
+      </button>
+      <button class="btn-default-custom btn-default-custom-red"
+              (click)="onCancelClick($event)">
+        Cancel
+      </button>
+    </div>
+  </form>
+  <loading-anim *ngIf="saving"></loading-anim>
+</div>

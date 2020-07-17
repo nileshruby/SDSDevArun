@@ -1,0 +1,170 @@
+<div class="config-parameter col-md-12 col-lg-12 col-sm-12" contentHeight=".main-wrapper">
+  <div class="grid-header">
+    <div class="controls" *ngIf="!loading">
+      <table>
+        <tr>
+          <td>
+            <form [formGroup]="SearchForm">
+              <filter-box
+              [value]="filterText"
+              (onClear)="RefreshFilterboxGrid(datatable)"
+              (onChange)="onGridFilter($event,datatable)"
+              placeholder="Filter Config Key"
+            ></filter-box>
+            </form>  
+          </td>
+          <td>
+            <button (click)="onConfigParamAddClick()" class="btn btn-default btn-default-custom btn-default-custom-info default-boot">
+              <i class="fa fa-plus"></i>
+              New Config Parameter
+            </button>
+          </td>
+          <td></td>
+          <td>
+            <button (click)="datatable.exportCSV()" class="btn btn-default btn-default-custom btn-default-custom-green marg-left-5 default-boot">
+              <i class="fa fa-file-excel-o"></i>
+              Export
+            </button>
+          </td>
+        </tr>
+      </table>
+    </div>
+    <h4 class="title">{{Heading}} - Config Parameters</h4>
+  </div>
+  <div #ConfigItemList>
+    <p-table [value]="items" [columns]="cols" #datatable  [responsive]="true" [resizableColumns]="true"  exportFilename="ConfigProducts" scrollHeight="70vh" [scrollable]="true" [paginator]="true" [rows]="17">
+      <ng-template pTemplate="colgroup" let-tableColumns> 
+        <colgroup> 
+          <col *ngFor="let col of tableColumns" > 
+        </colgroup> 
+      </ng-template> 
+        <ng-template pTemplate="header" let-columns>
+            <tr>
+                <th pResizableColumn *ngFor="let col of columns" [pSortableColumn]="col.field">
+                    {{col.header}}
+                    <p-sortIcon [field]="col.field"></p-sortIcon>
+                    <i class="pi pi-bars br-align"></i>
+                </th>
+                <th pResizableColumn class="edit-btn">
+                </th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-items>
+            <tr>
+                <td class="ui-resizable-column">{{items.Config_Key}}</td>
+                <td class="ui-resizable-column">{{items.DataType}}</td>
+                <td class="ui-resizable-column">{{items.Config_Value}}</td>
+                <td class="txt-center ui-resizable-column">
+                  <i class="fa fa-check" *ngIf="items.IsRequired"></i>
+                </td>
+                <td class="edit-btn ui-resizable-column">
+                    <i class="pi pi-pencil" (click)="onConfigParamClick({data: items})"></i>
+                    <i class="pi pi-trash" (click)="onConfigParamDeleteClick({data: items})"></i>
+                </td>
+            </tr>
+        </ng-template>
+    </p-table> 
+</div>
+
+</div>
+<local-modal #configModal
+             [target]="ConfigItemList"
+             height="60%"
+             width="65%" class="configAddEditModel">
+  <header class="header">
+    <span *ngIf="cfgForm.controls['PCID'].value === 0" ><h4>New Configuration Parameter</h4></span>
+    <span *ngIf="cfgForm.controls['PCID'].value !== 0"><h4>Edit Configuration Parameter</h4></span>
+  </header>
+  <main>
+      <div class="col-md-12 col-lg-12 col-sm-12 add-config-div">
+        <div class="cfg-add-panel" >
+          <form *ngIf="!saving" class="form-horizontal" [formGroup]="cfgForm" (ngSubmit)="onCfgSaveClick()">
+            <div class="form-group">
+              <label class="control-label col-sm-3">Data Type: <span style="color:Red;">*</span></label>
+              <div class="col-sm-9">
+                <select formControlName="DataType"  *ngIf="cfgForm.controls['PCID'].value === 0" class="form-control" [attr.disabled]="isDisabled ? '' : null" 
+                inputValidate (change)="changeDataType($event)"
+                errorMessage="Data Type is required">
+                  <option value="" selected="selected">Select</option>
+                  <option *ngFor="let dt of DATA_TYPES"
+                          [value]="dt.value">
+                    {{dt.key}}
+                  </option>
+                </select>
+                <input formControlName="DataType" class="form-control"  errorMessage="Data Type is required" [attr.disabled]="isDisabled ? '' : null" inputValidate *ngIf="cfgForm.controls['PCID'].value !== 0" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="control-label col-sm-3">Key: <span style="color:Red;">*</span></label>
+              <div class="col-sm-9">
+                <input formControlName="Config_Key" class="form-control" (keyup)="CheckDuplicateKey($event);" [attr.disabled]="isDisabled ? '' : null"
+                inputValidate
+                errorMessage="Key is required"/>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="control-label col-sm-3">Value: </label>
+              <div class="col-sm-9">
+                <input formControlName="Config_Value"
+                       *ngIf="cfgForm.controls['DataType'].value === 'String'"
+                       class="form-control" 
+                       />
+                <input type="number" formControlName="Config_Value"
+                       *ngIf="cfgForm.controls['DataType'].value === 'Number'"
+                       [maxlength]="MAX_KV_LENGTH" class="form-control" />
+                <input style="float: left; width: 15px; margin-top: 4px;" type="checkbox" formControlName="Config_Value"
+                       *ngIf="cfgForm.controls['DataType'].value === 'Boolean'" class="form-control" />
+                <date-picker formControlName="Config_Value" *ngIf="cfgForm.controls['DataType'].value === 'Datetime'"></date-picker>
+
+                <div *ngIf="cfgForm.controls['DataType'].value === 'List'" formArrayName="Config_Value_Option">
+                  <div class="row">
+                    <span class="col-md-3">Select value</span>
+                    <span class="col-md-7">Value</span>
+                  </div>
+                  <div class="row" *ngFor="let item of cfgForm.get('Config_Value_Option').controls let i = index;" [formGroupName]="i">
+                    <span class="col-md-3" style="text-align: center">
+                        <input type="radio" formControlName="Config_Value" (click)="SelectListValue(i);" name="Config_Value" [value]="i" class="form-control w-20" />
+                    </span>
+                    <span class="col-md-7">
+                      <input type="text" formControlName="Config_Value_Option" class="form-control">
+                    </span>
+                    <span class="col-md-2 plus-icon">
+                      <a  (click)="removeListValue(i);"><i class="fa fa-times" style="background-color: red;"></i></a>
+                    </span>
+                  </div>
+                  <div class="row">
+                    <span class="col-md-12 plus-icon">
+                      <a  (click)="addListValue(i);"><i class="fa fa-plus"></i></a>
+                    </span>
+                  </div>
+                  
+                </div>
+
+                <span *ngIf="!cfgForm.controls['DataType'].value">Select Data Type</span>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label class="control-label col-sm-3">Is Required:</label>
+              <div class="col-sm-9">
+                <input style="float: left; width: 15px; margin-top: 4px;" class="form-control" type="checkbox" formControlName="IsRequired" [attr.disabled]="isDisabled ? '' : null"/>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+  </main>
+  <footer class="form-controls-row">
+    <button *ngIf="!saving" (click)="onCfgSaveClick()" class="btn btn-sm btn-orange btn-default-custom btn-default-custom-info mr-2">
+      <span *ngIf="cfgForm.controls['PCID'].value === 0" >Save</span>
+      <span *ngIf="cfgForm.controls['PCID'].value !== 0">Update</span>
+    </button>
+    <button *ngIf="!saving" (click)="onCfgCancelClick()"  class="btn btn-sm btn-default btn-default-custom btn-default-custom-red default-boot">Cancel</button>
+    <button *ngIf="saving">
+        <loading-anim></loading-anim>
+    </button>
+    <div *ngIf="cfgForm.controls['PCID'].value !== 0" class="warnign-msg">
+      <span style="color:red;"><b>*WARNING : </b> The change will reflect for all onboarded FIs for this product</span>
+    </div>
+  </footer>
+</local-modal>

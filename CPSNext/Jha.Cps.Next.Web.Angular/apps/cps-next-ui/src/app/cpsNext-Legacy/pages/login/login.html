@@ -1,0 +1,151 @@
+<header class="container-fluid app-header clearfix">
+  <div class="row">
+    <div class="col-sm-2 col-md-3">
+      <img src="../../../assets/images/Logo-CPS.png" alt="LOGO" class="logo-img"/>
+    </div>
+    <div class="col-sm-6 col-md-6">
+      
+    </div>
+    <div class="col-sm-4 col-md-3 text-right">
+
+    </div>
+  </div>
+</header>
+
+<div class="message-panel" *ngIf="notification">
+  <h3>{{notification}}</h3>
+</div>
+
+<div class='login-panel' *ngIf="step === 1">
+  <h2 class="form-title">Log In</h2>
+  <form [formGroup]="loginForm" (ngSubmit)="onLoginFormSubmit($event)">
+    <div class="form-section">
+      <div class="form-group">
+
+        <div class="input-group">
+          <span class="input-group-addon"><i class="fa fa-user"></i></span>
+          <input type="text"
+                 autocomplete="off"
+                 class="form-control"
+                 placeholder="Username"
+                 formControlName="username"
+                 (keypress)="IV.passwordCharactersOnly($event)"
+                 (change)="onUsernameChange($event)"/>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <div class="input-group">
+          <span class="input-group-addon"><i class="fa fa-key"></i></span>
+          <input type="password"
+                 autocomplete="off"
+                 class="form-control"
+                 placeholder="Password"
+                 formControlName="password"
+                 (keypress)="IV.passwordCharactersOnly($event)"
+                 (change)="onPasswordChange($event)"/>
+        </div>
+      </div>
+      <a (click)="resetPassword($event)">Forgot Password</a>
+      <div class="form-group error-message" *ngIf="errorMessages && errorMessages.length">
+        <label class="col-md-11 error-message" *ngFor="let errMsg of errorMessages">{{errMsg}}</label>
+      </div>
+
+      <div class="form-buttons text-right">
+        <button type="submit" class="btn-lg btn-default-custom btn-default-custom-orange" *ngIf="!loading">Log In</button>
+        <button class="btn-lg btn btn-default" *ngIf="loading">
+          <loading-anim></loading-anim>
+        </button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<div class='otp-panel' *ngIf="step === 2">
+  <h2 class="form-title">Secondary Authentication</h2>
+  <form [formGroup]="otpForm" (ngSubmit)="onOtpFormSubmit($event)">
+    <div class="text-right">
+      <label class="error-message">* Please do not refresh the page</label>
+    </div>
+
+    <div>
+      <label>Enter One Time Passcode to proceed</label>
+    </div>
+
+    <div class="remaining-time">
+      <label>Time Left (mm:ss):</label>
+      <label>{{remainingTimeText}}</label>
+    </div>
+
+    <div class="otp-input-panel">
+      <label>Enter OTP here:</label>
+      <input type="text"
+             class="form-control"
+             autocomplete="off"
+             maxlength="6"
+             placeholder="Please enter OTP"
+             formControlName="otp"
+             (keyup)="onOtpKeyUp($event)">
+
+
+      <div *ngIf="errorMessages && errorMessages.length">
+        <label class="error-message" *ngFor="let errMsg of errorMessages">{{errMsg}}</label>
+      </div>
+        <!--<label class="error-message-sa">Incorrect OTP. Please enter again</label>-->
+    </div>
+
+    <div *ngIf="!otpResent">
+      Did not receive OTP?
+      <a (click)="onResendOtpClick()">Resend OTP</a>
+    </div>
+
+    <div class="otp-resent" *ngIf="otpResent">
+      OTP resent.  If you do not receive it, please contact your administrator.
+    </div>
+
+    <div class="form-buttons text-right">
+      <button type="submit" *ngIf="!saving" class="btn-lg btn-default-custom btn-default-custom-orange mr-1">Submit</button>      
+      <button *ngIf="saving" class="btn-lg btn-default-custom btn-default-custom-orange">
+        <loading-anim></loading-anim>
+        </button>
+      <button type="button" class="btn-lg btn-default-custom btn-default-custom-gray"
+              (click)="onCancelClick($event)">
+        Cancel
+      </button>
+    </div>
+  </form>
+</div>
+
+<div class='otp-panel timed-out' *ngIf="step === 3">
+    <div class="text-center">
+      <h4>Secondary Authentication timed out.</h4>
+      <button type="button" class="btn-lg btn-default-custom btn-default-custom-gray"
+              (click)="onCancelClick($event)">
+        Ok
+      </button>
+    </div>
+</div>
+
+<local-modal #yesNoModal class="reson_model" 
+height="40%"
+width="100%">
+<header class="header">
+  <h3>OTP Login</h3>
+</header>
+<main>
+  <div  class="cfg-add-panel">
+    <!-- <div class="swal2-icon swal2-warning swal2-animate-warning-icon" style="display: flex;"><span class="swal2-icon-text">!</span></div> -->
+    <div >
+      <h4>{{otpError}}</h4>
+    </div>
+  </div>
+</main>
+<footer class="form-controls-row" style="text-align: center;">
+  <button (click)="onConfirmLoginFailure($event)" class="btn btn-sm btn-orange btn-default-custom btn-default-custom-info" *ngIf="!saving">Ok</button>
+  <button *ngIf="saving">
+      <loading-anim></loading-anim>
+  </button>
+</footer>
+</local-modal>
+
+

@@ -1,0 +1,130 @@
+<div class="rate-admin col-md-12 col-lg-12 col-sm-12" contentHeight=".page-wrapper">
+    <div class="grid-header">
+        <div class="controls" *ngIf="!loading">
+          <table>
+            <tr>
+              <td>
+                <form [formGroup]="SearchForm">
+                  <filter-box
+                  (onClear)="RefreshFilterboxGrid(datatable)"
+                  (onChange)="onSearch($event,datatable)"
+                  placeholder="Search"
+                ></filter-box>
+                </form>
+              </td>
+              <!-- <td>
+                  <button (click)="formatXmlModal.open()" class="btn btn-default btn-default-custom btn-default-custom-dark-blue default-boot">Test Xml</button>
+                </td> -->
+              <td>
+                <button (click)="onICACreateClick()" class="btn btn-default btn-default-custom btn-default-custom-info marg-left-5 default-boot">
+                  <i class="fa fa-plus"></i>
+                  Add New ICA 
+                </button>
+              </td>
+              <td>
+                <button (click)="datatable.exportCSV()"  class="btn btn-default btn-default-custom btn-default-custom-green marg-left-5 default-boot">
+                  <i class="fa fa-file-excel-o"></i>
+                  Export
+                </button>
+              </td>
+            </tr>
+          </table>
+        </div>
+        <h4 class="title" *ngIf="aProduct">
+          {{aProduct.productName}} - ICA Maintenance
+        </h4>
+    </div>
+    <div #ICAGrid style="height: 100%;">
+        <p-table [value]="ICAList" [columns]="cols" #datatable dataKey="rateidx" [responsive]="true" [resizableColumns]="true" scrollHeight="70vh" [scrollable]="true" exportFilename="Mastercard-Fees"  [paginator]="true" [rows]="17">
+          <ng-template pTemplate="colgroup" let-tableColumns> 
+            <colgroup> 
+              <col *ngFor="let col of tableColumns" > 
+            </colgroup> 
+          </ng-template> 
+            <ng-template pTemplate="header" let-columns>
+                <tr>
+                    <th pResizableColumn *ngFor="let col of columns" [pSortableColumn]="col.field">
+                        {{col.header}}
+                        <p-sortIcon [field]="col.field"></p-sortIcon>
+                        <i class="pi pi-bars br-align"></i>
+                    </th>
+                    <th pResizableColumn class="edit-btn">
+                    </th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-ICAList >
+                <tr>
+                    <td class="ui-resizable-column">{{ICAList.ICA}}</td>
+                    <td class="ui-resizable-column">{{ICAList.ICA_Description}}</td>
+                    <td class="ui-resizable-column">{{ICAList.ICA_Type}}</td>
+                    <td class="edit-btn ui-resizable-column">
+                        <i class="pi pi-pencil" (click)="onICAEditClick({data: ICAList})"></i>
+                        <i class="pi pi-trash" (click)="onICADeleteClick({data: ICAList})"></i>
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table> 
+    </div>
+
+    <local-modal #MasterCardICAModal
+                    [target]="ICAGrid"
+                    height="43%"
+                    width="50%" class="addEditForm">
+        <header class="header">
+            <h4 *ngIf="newICA">Add ICA</h4>
+            <h4 *ngIf="!newICA">Edit ICA</h4>
+        </header>
+        <main>
+            <form [formGroup]="icaForm" 
+                (ngSubmit)="onICASaveClick()">
+                <table class="table table-responsive" border="0">
+                    <tr>
+                        <td class="tdLabel">ICA <span style="color:Red;">*</span></td>
+                        <td ><input type="text" class="form-control" maxlength="5" minlength="4" placeholder="ICA" formControlName="ICA" (keyup)="restrictToNumeric($event)" (onKeyDown)="restrictToNumeric($event)" inputValidate
+                          errorMessage="ICA is required" >
+                          <p *ngIf="icaNumError" style="color:Red;">Invalid. Need to have minimum 4 digits!</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="tdLabel">ICA Description </td>
+                        <td><input type="text"  class="form-control" placeholder="ICA_Description" formControlName="ICA_Description"></td>
+                    </tr>
+                    <tr>
+                        <td class="tdLabel">ICA Type <span style="color:Red;">*</span> </td>
+                        <td>
+                          <!-- <input type="text" class="form-control" placeholder="ICA Type" formControlName="ICA_Type"> -->
+                          <select formControlName="ICA_Type" class="form-control" inputValidate errorMessage="ICA Type is required"
+                              (change)="ICATypeChange($event)" [(ngModel)]="selectedICATypeID">
+                              <option value="0">Select</option>
+                              <option *ngFor="let DSC of ICATypeList" [value]="DSC.DictID">
+                                {{DSC.DictValue}}
+                              </option>
+                            </select>
+                        </td>
+                    </tr>
+                </table>
+            </form>
+        </main>
+        <footer class="form-controls-row">
+            <button (click)="onICASaveClick()" *ngIf="!saving" class="btn btn-sm btn-orange btn-default-custom btn-default-custom-info">Save</button>
+            <button (click)="onICACancelClick()" *ngIf="!saving" class="btn btn-sm btn-default btn-default-custom btn-default-custom-red default-boot" >Cancel</button>
+            <button *ngIf="saving">
+                <loading-anim></loading-anim>
+            </button>
+        </footer>
+    </local-modal>
+    <!-- <local-modal #formatXmlModal
+      [target]="ICAGrid"
+      height="85%"
+      width="60%">
+      <header class="header">
+        <h4>XML</h4>
+      </header>
+      <main style="overflow-y: scroll;">
+          <pre><code [highlight]="formattedXml"></code></pre>
+      </main>
+      <footer class="form-controls-row">
+          <button (click)="formatXmlModal.close()" class="btn btn-sm btn-default btn-default-custom btn-default-custom-red default-boot" >Close</button>
+      </footer>
+    </local-modal> -->
+</div>

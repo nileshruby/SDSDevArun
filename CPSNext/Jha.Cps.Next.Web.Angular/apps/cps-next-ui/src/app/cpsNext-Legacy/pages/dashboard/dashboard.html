@@ -1,0 +1,50 @@
+<div id="wrapper">
+  <app-header></app-header>
+  <div class="container-fluid banner-image">
+    <h3>Welcome to</h3>
+    <h1>JHA Card Processing Solutions</h1>
+  </div>
+
+  <div class="container-fluid page-wrapper">    
+    <div class="dash-wrapper" *ngIf="products.length">
+      <ngx-slick-carousel class="carousel slick-initialized slick-slider">
+        <button class="slick-prev slick-arrow" *ngIf="showLeft" aria-label="Previous" type="button" aria-disabled="false" (click)="scrollLeft()">Previous</button>
+    
+        <div #widgetsContent  class=" example-list" (loaded)="onItemLabelLoaded($event)">
+          <ng-template ngFor let-product [ngForOf]="introductionProduct" >
+            <dash-product
+              [product]="product"
+              class="example-box"
+              [collapsed]="collapseProducts"
+              [selected]="selectedProductContext && selectedProductContext.productId === product.productId"
+              (onProductCardClick)="onProductCardClick($event)">
+            </dash-product>
+          </ng-template>
+            <div cdkDropList cdkDropListOrientation="horizontal" class="" (cdkDropListDropped)="onDrop($event)">
+              <ng-template ngFor let-product [ngForOf]="withoutIntroProducts" >
+                <dash-product cdkDrag
+                  [product]="product"
+                  class="example-box"
+                  [collapsed]="collapseProducts"
+                  [selected]="selectedProductContext && selectedProductContext.productId === product.productId"
+                  (onProductCardClick)="onProductCardClick($event)">
+                </dash-product>
+              </ng-template>
+                
+            </div> 
+            <div *ngIf="selectedProductContext">
+              <dash-product-details [details]="selectedProductContext"></dash-product-details>
+            </div>
+        </div>
+        <button class="slick-next slick-arrow" *ngIf="showRight" aria-label="Next" type="button" (click)="scrollRight()" aria-disabled="false">Next</button>
+          
+      </ngx-slick-carousel>
+    
+    </div>
+    
+    <div class="dash-wrapper" *ngIf="!products.length">
+      <loading-anim></loading-anim>
+    </div>
+  </div>
+  <div id="push"></div>
+</div>

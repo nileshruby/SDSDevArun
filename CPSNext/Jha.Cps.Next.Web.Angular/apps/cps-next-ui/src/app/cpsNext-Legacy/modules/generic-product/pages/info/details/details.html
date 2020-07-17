@@ -1,0 +1,153 @@
+<div class=" cm-details">
+  <div class="col-md-12 col-lg-12 col-sm-12" *ngIf="loading">
+    <loading-anim></loading-anim>
+  </div>
+  <div class="row" *ngIf="!editMode">
+    <div class="col-md-8 col-lg-8 col-sm-12">
+      <div class="section-header">
+        <p>Product Information </p>
+      </div>
+
+      <table class="table table-responsive section-table" *ngIf="product">
+        <tr>
+          <td>Product Name:</td>
+          <td>{{product.productName}}</td>
+        </tr>
+        <tr>
+          <td>Version:</td>
+          <td>{{product.versionNumber}}</td>
+        </tr>
+        <tr>
+          <td>Product Description:</td>
+          <td>{{product.shortDesc}}</td>
+        </tr>
+        <tr>
+          <td>Product Details:</td>
+          <td>{{product.longDesc}}</td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="col-md-4 col-lg-4 col-sm-12">
+      <div class="section-header">
+        <p>Contact Information</p>
+      </div>
+
+      <table class="table table-responsive section-table" *ngIf="primContact">
+        <tr>
+          <td>Name:</td>
+          <td>{{primContact.name}}</td>
+        </tr>
+        <tr>
+          <td>E-mail:</td>
+          <td>{{primContact.email}}</td>
+        </tr>
+        <tr>
+          <td style="width: 29%;">Support Number:</td>
+          <td>{{primContact.phone | usphone}}</td>
+        </tr>
+      </table>
+
+      <div *ngIf="product && !primContact">
+        <label>Product has no primary contact.</label>
+      </div>
+    </div>
+
+    
+  </div>
+
+  <div class="row" *ngIf="editMode">
+    <form [formGroup]="detailsForm" (ngSubmit)="onFormSubmit()">
+      <div class="col-md-6 col-lg-6 col-sm-6">
+        <div class="section-header">
+          <p>Product Information </p>
+        </div>
+
+        <table class="table table-responsive section-table">
+          <tr>
+            <td>Product Name:</td>
+            <td>
+              <input type="text"
+                     class="form-control"
+                     placeholder="Product Name"
+                     formControlName="productName" />
+            </td>
+          </tr>
+          <tr>
+            <td>Version:</td>
+            <td>
+              <input type="text"
+                     class="form-control"
+                     placeholder="Product Name"
+                     formControlName="versionNumber" />
+            </td>
+          </tr>
+          <tr>
+            <td>Product Description:</td>
+            <td>
+              <input type="text"
+                     class="form-control"
+                     placeholder="Product Name"
+                     formControlName="shortDesc"  />
+            </td>
+          </tr>
+          <tr>
+            <td>Product Details:</td>
+            <td>
+              <input type="text"
+                     class="form-control"
+                     placeholder="Product Name"
+                     formControlName="longDesc" />
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="col-md-6 col-lg-6 col-sm-6">
+        <div class="section-header">
+          <p>Contact Information</p>
+        </div>
+
+        <table class="table table-responsive section-table">
+          <tr>
+            <td>Name:</td>
+            <td>
+              <input type="text"
+                     class="form-control"
+                     placeholder="Product Name"
+                     formControlName="contactName" />
+            </td>
+          </tr>
+          <tr>
+            <td>E-mail:</td>
+            <td>
+              <input type="text"
+                     class="form-control"
+                     placeholder="Product Name"
+                     formControlName="contactEmail" />
+            </td>
+          </tr>
+          <tr>
+            <td>Support Number:</td>
+            <td>
+              <input type="text"
+                     class="form-control"
+                     placeholder="Product Name"
+                     formControlName="supportNumber" />
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="col-md-12 col-lg-12 col-sm-12">
+        <div class="form-controls-row">
+          <button type="submit" *ngIf="!loading">Save</button>
+          <button class="" (click)="onCancelClick()" *ngIf="!loading">Cancel</button>
+          <button *ngIf="loading">
+            <loading-anim></loading-anim>
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

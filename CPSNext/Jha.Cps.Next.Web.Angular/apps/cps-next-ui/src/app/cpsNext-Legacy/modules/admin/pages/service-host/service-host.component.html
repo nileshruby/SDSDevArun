@@ -1,0 +1,318 @@
+<div class="service-host col-md-12 col-lg-12 col-sm-12" contentHeight=".main-wrapper">
+  <div class="grid-header">
+    <div class="controls">
+      <table>
+        <tr>
+          <td>
+            <form *ngIf="!loading">
+              <filter-box
+                (onClear)="RefreshFilterboxGrid(datatable)"
+                (onChange)="onSearch($event,datatable)"
+                placeholder="Search"
+              ></filter-box>
+            </form>
+          </td>
+          <td>
+            <button (click)="onServiceHostcreateClick()"
+              class="btn btn-default btn-default-custom btn-default-custom-info default-boot">
+              <i class="fa fa-plus"></i>
+              New Host Container
+            </button></td>
+          <td></td>
+          <td>
+            <button *ngIf="hosts.length" (click)="datatable.exportCSV()"
+              class="btn btn-default btn-default-custom btn-default-custom-green marg-left-5 default-boot">
+              <i class="fa fa-file-excel-o"></i>
+              Export
+            </button></td>
+        </tr>
+      </table>
+    </div>
+    <h3 class="title header">Global Admin - Service Hosts Maintenance </h3>
+  </div>
+
+  <!-- <div contentHeight=".main-wrapper" (resize)="onGridWrapperResize($event)">
+     <ag-grid #grid [config]="gridOptions" [loading]="loading">
+    </ag-grid> 
+  </div> -->
+
+  <div #HostGrid >
+    <p-table [value]="ptablehostList" [columns]="cols" #datatable dataKey="HscID" [responsive]="true" [resizableColumns]="true" exportFilename="Servicehosts"  [expandedRowKeys]="expandedRows" scrollHeight="70vh" [scrollable]="true" [paginator]="true" [rows]="17">
+      <ng-template pTemplate="colgroup" let-tableColumns> 
+        <colgroup> 
+          <col *ngFor="let col of tableColumns" > 
+        </colgroup> 
+      </ng-template> 
+        <ng-template pTemplate="header" let-columns>
+            <tr>
+                <th pResizableColumn *ngFor="let col of columns" [style.width]="col.width" [pSortableColumn]="col.field">
+                    {{col.header}}
+                    <p-sortIcon [field]="col.field"></p-sortIcon>
+                    <i class="pi pi-bars br-align"></i>
+                </th>
+                <th pResizableColumn class="edit-btn">
+                </th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-ptablehostList>
+            <tr>
+                <td class="ui-resizable-column">{{ptablehostList.Name}}</td>
+                <td class="ui-resizable-column">{{ptablehostList.Description}}</td>
+                <td class="ui-resizable-column">{{ptablehostList.ContainerName}}</td>
+                <td class="ui-resizable-column">{{ptablehostList.ContainerType}}</td>
+                <td class="ui-resizable-column">{{ptablehostList.ServerName}}</td>
+                <td class="ui-resizable-column">{{ptablehostList.ServerIP}}</td>
+                <td class="ui-resizable-column">{{ptablehostList.SiteName}}</td>
+                <td class="ui-resizable-column">{{ptablehostList.Status}}</td>
+                <td class="ui-resizable-column">{{ptablehostList.ContainerRootDirectory}}</td>
+                <td class="edit-btn ui-resizable-column">
+                    <i class="pi pi-pencil" (click)="onServiceHostEditClick({data: ptablehostList})"></i>
+                    <i class="pi pi-trash" (click)="onServiceHostDeleteClick({data: ptablehostList})"></i>
+                </td>
+            </tr>
+        </ng-template>      
+    </p-table> 
+</div>
+
+  <!-- Service Host MODAL -->
+  <local-modal #serviceHostModal [target]="HostGrid" height="95%" width="60%">
+    <header *ngIf="ServiceHostEditing" class="header">
+      <h4 *ngIf="!ServiceHostEditing.HscID">Add Service Host Container</h4>
+      <h4 *ngIf="ServiceHostEditing.HscID">Edit Service Host Container</h4>
+    </header>
+    <main *ngIf="serviceHostForm" style="height: 86%;">
+      <form [formGroup]="serviceHostForm" (ngSubmit)="onUserSaveClick()">
+        <table class="table table-responsive ">
+
+          <tr>
+            <td class="width-30">Data Center Site <span style="color:Red;">*</span></td>
+            <td class="width-70">
+              <select formControlName="DCSiteFlag" class="form-control" *ngIf="!loadingDataCenterID"
+              inputValidate
+                           errorMessage="Data Center Site is required"
+                (change)="DCChange($event)" [(ngModel)]="selectedDataCenterFlagID">
+                <option value="" selected="selected">Select</option>
+                <option *ngFor="let DSC of DataCenterSiteList" [value]="DSC.DictID">
+                  {{DSC.DictValue}}
+                </option>
+              </select>
+              <loading-anim *ngIf="loadingDataCenterID"></loading-anim>
+            </td>
+          </tr>
+          <tr>
+            <td>Server Name <span style="color:Red;">*</span></td>
+            <td>
+              <input type="text" class="form-control" placeholder="Server Name" maxlength="100"
+              inputValidate
+                           errorMessage="Server Name is required"
+                formControlName="ServerName" (keypress)="IV.alphaNumeric_AndDistinctCharactersOnly($event,'.')" (focusout)="UniqueHostingName($event)" />
+            </td>
+          </tr>
+          <tr>
+            <td>Server IP <span style="color:Red;">*</span></td>
+            <td>
+              <input type="text" class="form-control" placeholder="Server IP" maxlength="20" formControlName="ServerIP"
+              inputValidate
+                           errorMessage="Server IP is required"
+                (keyup)="restrictToIPAddress($event)" />
+              <div *ngIf="invalidIPAddress">
+                <span style="color: rgb(180, 12, 12);">Please enter valid IP address</span>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td>Service Name <span style="color:Red;">*</span></td>
+            <td>
+              <input type="text" class="form-control" placeholder="Service Name" maxlength="500"
+              inputValidate
+                           errorMessage="Service Name is required"
+                formControlName="ContainerName" (keypress)="IV.alphaNumericOnly($event,true)" (focusout)="UniqueContainerName($event)"/>
+                <div *ngIf="InvalidExistingContainerName">
+                  <span style="color: rgb(180, 12, 12);">Please enter unique Service name for the server</span>
+                </div>
+            </td>
+          </tr>
+          <tr>
+            <td>Description</td>
+            <td>
+              <input type="text" class="form-control" placeholder="Description" maxlength="500"
+                formControlName="Description" />
+            </td>
+          </tr>
+          <tr>
+            <td>Status <span style="color:Red;">*</span></td>
+            <td>
+                <select formControlName="Status" class="form-control" *ngIf="!loadingStatusID"
+                inputValidate
+                           errorMessage="Status is required"
+                (change)="StatusChange($event)" [(ngModel)]="selectedStatus">
+                <option value="" selected="selected">Select</option>
+                <option *ngFor="let status of StatusList" [value]="status.DictID">
+                  {{status.DictValue}}
+                </option>
+              </select>           
+               
+              <loading-anim *ngIf="loadingStatusID"></loading-anim>
+            </td>
+          </tr>
+          <tr>
+            <td>Container Type <span style="color:Red;">*</span></td>
+            <td>
+              <!-- *ngIf="!loadingContainerID" -->
+              <select formControlName="ContainerType" class="form-control" *ngIf="!loadingContainerID"
+              inputValidate errorMessage="Container Type is required"
+                (change)="SHChange($event)" [(ngModel)]="selectedID">
+                <option value="" selected="selected">Select</option>
+                <option *ngFor="let SH of ContainerTypeList" [value]="SH.DictID">
+                  {{SH.DictValue}}
+                </option>
+              </select>
+              <loading-anim *ngIf="loadingContainerID"></loading-anim>
+            </td>
+          </tr>
+          <tr>
+            <td>Container Name <span style="color:Red;">*</span></td>
+            <td>
+              <input type="text" class="form-control" placeholder="Container Name" maxlength="255"
+              inputValidate
+                           errorMessage="Container Name is required"
+                formControlName="ContainerHostingName" (keypress)="IV.alphaNumeric_AndDistinctCharactersOnly($event,'_')"  />
+                <!-- (focusout)="PopulateDefaultRootDirPath($event)" -->
+              <div *ngIf="InvalidExistingHostingName">
+                  <span style="color: rgb(180, 12, 12);">Please enter unique container name for the server</span>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td>Container Root Directory <span style="color:Red;">*</span></td>
+            <td>
+              <input type="text" class="form-control" placeholder="Container Root Directory" maxlength="255"
+              inputValidate
+              errorMessage="Container Root Directory is required"
+              formControlName="ContainerRootDirectory" />
+                <!-- (keypress)="restrictToDirectoryPath" (focusout)="PopulateDefaultConfigFilePath($event)"  -->
+            </td>
+          </tr>
+          <tr>
+            <td>Container Config File Path  <span style="color:Red;">*</span> </td>
+            <td>
+              <div class="row">
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" placeholder="Container Config File Path" maxlength="255"  inputValidate
+                    errorMessage="Container config File Path is required"
+                    formControlName="ContainerConfigFilePath" />
+                    <span style="color: rgb(243, 111, 34);">Provide fully qualified path including server name</span>
+                    <!-- (focusout)="restrictToDirectoryPath($event)" -->
+                </div>
+                <div class="col-sm-2" >
+                  <button type="button" (click)="retrieveFileContent()" class="btn btn-sm btn-default-custom-orange btn-default-custom width-100 hieght-34 p-0"><span class="fa fa-plus plus-icone"></span></button>
+                </div>
+              </div>
+              <!-- <div *ngIf="invalidConfigFilePath">
+                  <span style="color: rgb(180, 12, 12);">Please enter valid directory path</span>
+              </div> -->
+            </td>
+          </tr>
+          <tr>
+            <td>Container Config Template</td>
+            <td>
+              <select formControlName="ContainerConfigTemplate" class="form-control" *ngIf="!loadingContainerConfigID"
+                (change)="CTChange($event)" [(ngModel)]="selectedConfigTemplateID">
+                <option value="0" selected="selected">Select</option>
+                <option *ngFor="let CT of ConfigTemplateList" [value]="CT.CfgTplID">
+                  {{CT.TemplateName}}
+                </option>
+              </select>             
+              <loading-anim *ngIf="loadingContainerConfigID"></loading-anim>
+
+            </td>
+          </tr>
+          <tr>
+            <td>Assembly Location</td>
+            <td>
+              <input type="text" class="form-control" placeholder="Assembly Location" maxlength="255" 
+                formControlName="AssemblyLocation"  />
+                <!-- (focusout)="restrictToDirectoryPath($event)" -->
+              <!-- <div *ngIf="invalidAssemblyFilePath">
+                <span style="color: rgb(180, 12, 12);">Please enter valid directory path</span>
+              </div> -->
+            </td>
+          </tr>       
+          <tr>
+            <td>Log File Path</td>
+            <td>
+              <div class="row">
+                <div class="col-sm-10" >
+                  <input type="text" class="form-control" placeholder="Log Location" maxlength="255" 
+                  formControlName="LogLocation"/>
+                  <!-- (focusout)="restrictToDirectoryPath($event)"  -->
+                </div>
+                <div class="col-sm-2" >
+                  <button type="button" (click)="retrieveLogFileContent()" class="btn btn-sm btn-default-custom-orange btn-default-custom width-100 hieght-34 p-0"><span class="fa fa-plus plus-icone"></span></button>
+                </div>
+              </div>
+              <!-- <div *ngIf="invalidLogFilePath">
+                <span style="color: rgb(180, 12, 12);">Please enter valid directory path</span>
+              </div> -->
+            </td>
+          </tr>
+        </table>
+      </form>
+    </main>
+
+    <footer class="form-controls-row">
+      <button (click)="onServiceHostSaveClick()" *ngIf="!saving"
+        class="btn btn-sm btn-orange btn-default-custom btn-default-custom-info">Save</button>
+      <button (click)="onServiceHostCancelClick()" *ngIf="!saving"
+        class="btn btn-sm btn-default btn-default-custom btn-default-custom-red default-boot">Cancel</button>
+      <button *ngIf="saving">
+        <loading-anim></loading-anim>
+      </button>
+    </footer>
+  </local-modal>
+
+  <local-modal #configfileXmlModal
+    [target]="HostGrid"
+    height="85%"
+    width="60%">
+    <header class="header">
+      <h4>XML</h4>
+    </header>
+    <main style="overflow-y: scroll;">
+      <form [formGroup]="configfileXmlForm"    
+      (ngSubmit)="onconfigfileXmlSaveClick()">      
+       <!-- <pre><code [highlight]="configfileXml"></code></pre>  -->
+       <textarea   formControlName="FileContent" class="textarea">{{configfileXml}}</textarea>
+      </form>
+    </main>
+    <footer class="form-controls-row">
+        <button (click)="onconfigfileXmlSaveClick()" *ngIf="!configfilexmlsaving"
+          class="btn btn-sm btn-orange btn-default-custom btn-default-custom-info">Save</button>
+        <button (click)="configfileXmlModal.close()" *ngIf="!configfilexmlsaving"
+          class="btn btn-sm btn-default btn-default-custom btn-default-custom-red default-boot">Cancel</button>
+        <button *ngIf="configfilexmlsaving">
+          <loading-anim></loading-anim>
+        </button>
+    </footer>
+  </local-modal>
+
+  <local-modal #logfileXmlModal
+  [target]="HostGrid"
+  height="85%"
+  width="60%">
+  <header class="header">
+    <h4>XML</h4>
+  </header>
+  <main style="overflow-y: scroll;">
+    <form [formGroup]="logfileXmlForm">
+     <!-- <pre><code [highlight]="configfileXml"></code></pre>*ngFor="let logs of logfileXml[childindex].split('.')"  -->
+     <textarea   formControlName="FileContent" readonly *ngIf="logfileXml.length > 0"  class="textarea">{{logfileXml}}</textarea>
+    </form>
+  </main>
+  <footer class="form-controls-row">
+      <button (click)="logfileXmlModal.close()" 
+        class="btn btn-sm btn-default btn-default-custom btn-default-custom-red default-boot">Close</button>     
+  </footer>
+</local-modal>
+
+</div>

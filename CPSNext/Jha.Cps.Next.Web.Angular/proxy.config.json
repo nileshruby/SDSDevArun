@@ -1,0 +1,20 @@
+{
+  "/api/*": {
+    "target": {
+      "host": "localhost",
+      "protocol": "http:",
+      "port": 13310
+    },
+    "pathRewrite": {
+      "^/api/": "/"
+    },
+    "changeOrigin": true,
+    "secure": false,
+    "logLevel": "debug"
+  },
+  "/images": {
+    "pathRewrite": {
+      "^/images": "/src/assets/images"
+    }
+  }
+}

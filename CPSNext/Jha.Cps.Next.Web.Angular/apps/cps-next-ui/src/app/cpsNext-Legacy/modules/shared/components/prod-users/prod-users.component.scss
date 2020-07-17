@@ -1,0 +1,108 @@
+.user-maint {
+  overflow: hidden;
+}
+.btn-default-custom-green {
+  background-color: #3aa03a;
+}
+.btn-default-custom-green:hover, .btn-default-custom-green:focus {
+  background-color: #fff;
+  box-shadow: 0 0 0 0 #fff; 
+  color: #3aa03a;
+  border: 1px solid #3aa03a;
+}
+.btn-default-custom-info {
+  background-color: #089de3;
+}
+.btn-default-custom-info:hover, .btn-default-custom-info:focus {
+  background-color: #fff;
+  box-shadow: 0 0 0 0 #fff;
+  color: #089de3;
+  border: 1px solid #089de3;
+}
+.btn-default-custom-red {
+  background-color: #dd0303;
+}
+.btn-default-custom-red:hover, .btn-default-custom-red:focus {
+  background-color: #fff;
+  box-shadow: 0 0 0 0 #fff;
+  color: #dd0303;
+  border: 1px solid #dd0303;
+}
+.btn-default-custom-orange {
+  background-color: #ff8a00;
+}
+.btn-default-custom-orange:hover, .btn-default-custom-orange:focus {
+  background-color: #fff;
+  box-shadow: 0 0 0 0 #fff;
+  color: #ff8a00;
+  border: 1px solid #ff8a00;
+}
+.btn-default-custom{
+  margin-right: 20px;
+  border-radius: 0px;
+  border: 0px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  height: 35px;
+  border-radius: 0px;
+  padding: 8px 20px 10px;
+  cursor: pointer;
+  text-transform: capitalize;
+}
+::ng-deep .mat-slide-toggle-bar {
+    background-color: grey
+  }
+  .red {
+    color: red; 
+}
+
+.green {
+    color: green;
+}
+.marg-left-5{
+  margin-left: 5px
+}
+.check-user-nessage{
+  height: 20px;
+  width: 250px
+}
+.grid-header .title {
+  color: #FFF;
+  margin: 10px 10px;
+}
+header.header {
+  background-color: #ff8a00 !important;
+}
+.width-100{
+  width: 100%;
+}
+.hieght-34{
+  height: 34px;
+}
+.dash-wrapper {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: 99999;
+  text-align: center;
+  vertical-align: middle;
+  margin: auto;
+  border-radius: 0px;
+  background-color: #ffffff9c;
+
+  .slide-wrapper {
+    padding: 0 20px;
+  }
+}
+::ng-deep .lock-unlock-user.mat-slide-toggle.mat-checked .mat-slide-toggle-thumb {
+  background-color: #3aa03a;
+}
+
+::ng-deep .lock-unlock-user.mat-slide-toggle.mat-checked .mat-slide-toggle-bar {
+  background-color: #98d498;
+}
+
+::ng-deep .multiselect-dropdown .multiselect-item-checkbox div::before{
+  border-radius: 100% !important;
+}
