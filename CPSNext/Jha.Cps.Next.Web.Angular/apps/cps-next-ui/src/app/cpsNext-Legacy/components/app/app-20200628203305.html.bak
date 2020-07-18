@@ -1,8 +1,0 @@
-<router-outlet></router-outlet>
-
-<app-footer></app-footer>
-<dialog-modal></dialog-modal>
-
-<div>
-
-</div>
